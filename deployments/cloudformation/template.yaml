@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  notifications-proxy
+  
+  Sample SAM Template for notifications-proxy
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 5
+
+Resources:
+
+  NotificationsProxyAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Production
+      EndpointConfiguration:
+        Type: REGIONAL
+      MethodSettings:
+        - HttpMethod: "*"
+          ResourcePath: "/*"
+          LoggingLevel: INFO
+          DataTraceEnabled: false
+          MetricsEnabled: false
+          CachingEnabled: false
+
+  ProxyLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Proxy}"
+      RetentionInDays: 7
+
+  Proxy:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ../../cmd/proxy
+      Handler: proxy
+      Runtime: go1.x
+      Events:
+        CatchAll:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /proxy
+            Method: POST
+            RestApiId: !Ref NotificationsProxyAPI
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          DISCORD_API: "{{resolve:ssm:/discord-api}}"
+

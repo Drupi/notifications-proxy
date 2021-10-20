@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"tfnotifications/pkg/tfc"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -35,6 +37,15 @@ type DiscordEmbedField struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
 	Inline bool   `json:"inline"`
+}
+
+func NewClient() Discord {
+	return Discord{
+		Token: os.Getenv("DISCORD_API"),
+		HTTPClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+	}
 }
 
 func (d *Discord) SendDiscordMessageFromTFC(ctx context.Context, tfc tfc.TerraformWebhook) {

@@ -5,18 +5,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"tfnotifications/pkg/discord"
 	"tfnotifications/pkg/tfc"
 
 	"github.com/aws/aws-lambda-go/events"
 	"go.uber.org/zap"
 )
 
-type handler struct {
-	dclient discord.Discord
-}
-
-func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (h *handler) handle(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 	ctx = context.WithValue(ctx, "log", logger)

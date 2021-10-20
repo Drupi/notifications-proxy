@@ -1,23 +1,19 @@
 package main
 
 import (
-	"net/http"
-	"os"
 	"tfnotifications/pkg/discord"
-	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+type handler struct {
+	dclient discord.Discord
+}
+
 func main() {
 
-	h := &handler{
-		dclient: discord.Discord{
-			Token: os.Getenv("DISCORD_API"),
-			HTTPClient: &http.Client{
-				Timeout: 30 * time.Second,
-			},
-		},
+	h := handler{
+		dclient: discord.NewClient(),
 	}
-	lambda.Start(h.handleRequest)
+	lambda.Start(h.handle)
 }
